@@ -1,6 +1,9 @@
 import RPi.GPIO as GPIO
 import time
 from mpd import MPDClient
+import alsaaudio
+
+mixer = alsaaudio.Mixer(control = 'PCM')
 
 client = MPDClient()
 client.timeout = 10
@@ -17,22 +20,22 @@ GPIO.add_event_detect(5, GPIO.FALLING, bouncetime=200)
 GPIO.add_event_detect(35, GPIO.FALLING, bouncetime=200)
 GPIO.add_event_detect(37, GPIO.FALLING, bouncetime=200)
 
-volume = 50
+
+def change_vol(vol_change):
+        current_vol = mixer.getvolume()
+        new_vol = current_vol[0] + vol_change
+        if (new_vol < 0 or new_vol > 100): 
+            return
+        mixer.setvolume(new_vol)
 
 def vol_down(channel):
-        global volume
-	print ("Volume naar beneden")
-        volume -= 10
-        client.setvol(volume)
-        print(volume)
-
+    	print ("Volume naar beneden")
+        change_vol(-4)
 
 def vol_up(channel):
         global volume
 	print ("Volume omhoog")
-        volume += 10
-        client.setvol(volume)
-        print(volume)
+        change_vol(4)
 
 def item_down(channel):
         print ("Item naar beneden")
